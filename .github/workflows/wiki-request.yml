@@ -61,10 +61,21 @@ jobs:
         if: steps.push.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          BRANCH: wiki-request-${{ github.event.issue.number }}
         run: |
-          BRANCH="wiki-request-${{ github.event.issue.number }}"
           EXISTING=$(gh pr list --base dev --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
           if [ -n "$EXISTING" ]; then echo "PR already exists: #$EXISTING"; exit 0; fi
-          gh pr create --base dev --head "$BRANCH" \
-            --title "Add wiki: request from #${{ github.event.issue.number }}" \
-            --body "Automated PR from wiki request issue #${{ github.event.issue.number }}. Please review the new wiki entry and merge into \`dev\` if it looks good. Closes #${{ github.event.issue.number }}"
+          if gh pr create --base dev --head "$BRANCH" \
+            --title "Add wiki: request from #$ISSUE_NUM" \
+            --body "Automated PR from wiki request issue #$ISSUE_NUM. Please review the new wiki entry and merge into \`dev\` if it looks good. Closes #$ISSUE_NUM"; then
+            echo "PR created with gh"
+            exit 0
+          fi
+          echo "gh pr create failed, trying REST API..."
+          PR_JSON=$(node -e "
+            const body = 'Automated PR from wiki request issue #' + process.env.ISSUE_NUM + '. Please review the new wiki entry and merge into \\`dev\\` if it looks good. Closes #' + process.env.ISSUE_NUM;
+            console.log(JSON.stringify({ title: 'Add wiki: request from #' + process.env.ISSUE_NUM, head: process.env.BRANCH, base: 'dev', body }));
+          ")
+          curl -sS -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls" -d "$PR_JSON" || true
