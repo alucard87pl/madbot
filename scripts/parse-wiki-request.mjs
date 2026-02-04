@@ -16,12 +16,15 @@ function readStdin() {
   });
 }
 
+// Stop at next section: ## or ### or ** (issue form can use ### headings)
+const NEXT_SECTION = "(?=\\n##\\s|\\n###\\s|\\n\\*\\*|$)";
+
 function extractSection(body, heading, altPattern) {
-  // Markdown template: ## Wiki code ... or ## Display name
-  let regex = new RegExp(`##\\s*${heading}[^\\n]*\\n([\\s\\S]*?)(?=\\n##\\s|\\n\\*\\*|$)`, "i");
+  // Markdown template: ## Wiki code ... or ### Wiki code (GitHub form output)
+  let regex = new RegExp(`(?:##|###)\\s*${heading}[^\\n]*\\n([\\s\\S]*?)${NEXT_SECTION}`, "i");
   let m = body.match(regex);
   if (!m && altPattern) {
-    // Issue form: **Wiki code (short tag)** or **Display name**
+    // Issue form bold: **Wiki code (short tag)** or **Display name**
     regex = new RegExp(altPattern, "i");
     m = body.match(regex);
   }
