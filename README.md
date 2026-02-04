@@ -28,7 +28,7 @@ Madbot taps into the same wikis you already geek out on—Memory Alpha, Stargate
 | `sgc` | [Stargate Wiki](https://stargate.fandom.com/) — Indeed. |
 | `b5` | [The Babylon Project](https://babylon5.fandom.com/) — Babylon 5 📜 |
 
-More can be added; under the hood it’s built to work with any MediaWiki-based wiki (Fandom or not). **Want another wiki?** [Request one](https://github.com/alucard87pl/madbot/issues/new?template=wiki_request.yml&title=%5BWiki+request%5D+)—fill in the form and we'll get a PR opened to add it to `dev`.
+More can be added; under the hood it’s built to work with any MediaWiki-based wiki (Fandom or not). **Want another wiki?** [Request one](https://github.com/alucard87pl/madbot/issues/new?template=wiki_request.yml&title=%5BWiki+request%5D+)—fill in the form and we'll get a PR opened to add it to the repo.
 
 ---
 

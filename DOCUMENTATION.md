@@ -97,7 +97,7 @@ src/
 ```
 
 - **Adding a wiki:** Add an entry to the `WIKIS` array in `src/wiki/wikis.ts`. The bot and CLI pick it up automatically. For non-standard API paths, see “MediaWiki and non-Fandom wikis” below.
-- **Wiki request automation:** Users can open an issue with the "Wiki request" template (code, name, base URL, label). The repo needs a **`wiki-request`** label and a **`dev`** branch. A GitHub Action parses the issue, adds the entry to `wikis.ts`, and opens a PR targeting `dev`. Review and merge the PR to add the wiki.
+- **Wiki request automation:** Users can open an issue with the "Wiki request" template (code, name, base URL, label). The repo needs a **`wiki-request`** label. A GitHub Action parses the issue, adds the entry to `wikis.ts`, and opens a PR targeting `main`. Review and merge the PR to add the wiki.
 - **Non–MediaWiki wikis:** Implement the `WikiProvider` interface (see `src/wiki/types.ts`) and wire it in `providers.ts` (and optionally in the wiki list if you add a way to select it).
 
 ---
@@ -117,4 +117,7 @@ Slash commands are **re-registered on every startup** via a PUT to Discord’s a
 
 ## Branching
 
-Use `main` for stable releases and `dev` (or another branch) for ongoing work.
+We use **short-lived feature branches** and a single long-lived **`main`** branch:
+
+- **`main`** — deployable default branch. Wiki-request PRs and feature PRs merge here.
+- **Feature work** — create a branch from `main` (e.g. `feature/something` or `fix/thing`), make changes, open a PR into `main`. After merge, delete the branch. No long-lived `dev` branch; everything flows into `main`.

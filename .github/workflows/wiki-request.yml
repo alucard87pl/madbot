@@ -1,5 +1,5 @@
 # When someone opens an issue with the "Wiki request" template (label: wiki-request),
-# parse the issue body and open a PR that adds the new wiki to src/wiki/wikis.ts targeting dev.
+# parse the issue body and open a PR that adds the new wiki to src/wiki/wikis.ts targeting main.
 
 name: Wiki request PR
 
@@ -18,10 +18,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout dev
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: main
           fetch-depth: 0
 
       - name: Parse issue body
@@ -64,18 +64,18 @@ jobs:
           ISSUE_NUM: ${{ github.event.issue.number }}
           BRANCH: wiki-request-${{ github.event.issue.number }}
         run: |
-          EXISTING=$(gh pr list --base dev --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
+          EXISTING=$(gh pr list --base main --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
           if [ -n "$EXISTING" ]; then echo "PR already exists: #$EXISTING"; exit 0; fi
-          if gh pr create --base dev --head "$BRANCH" \
+          if gh pr create --base main --head "$BRANCH" \
             --title "Add wiki: request from #$ISSUE_NUM" \
-            --body "Automated PR from wiki request issue #$ISSUE_NUM. Please review the new wiki entry and merge into \`dev\` if it looks good. Closes #$ISSUE_NUM"; then
+            --body "Automated PR from wiki request issue #$ISSUE_NUM. Please review the new wiki entry and merge into \`main\` if it looks good. Closes #$ISSUE_NUM"; then
             echo "PR created with gh"
             exit 0
           fi
           echo "gh pr create failed, trying REST API..."
           PR_JSON=$(node -e "
-            const body = 'Automated PR from wiki request issue #' + process.env.ISSUE_NUM + '. Please review the new wiki entry and merge into \\`dev\\` if it looks good. Closes #' + process.env.ISSUE_NUM;
-            console.log(JSON.stringify({ title: 'Add wiki: request from #' + process.env.ISSUE_NUM, head: process.env.BRANCH, base: 'dev', body }));
+            const body = 'Automated PR from wiki request issue #' + process.env.ISSUE_NUM + '. Please review the new wiki entry and merge into \\`main\\` if it looks good. Closes #' + process.env.ISSUE_NUM;
+            console.log(JSON.stringify({ title: 'Add wiki: request from #' + process.env.ISSUE_NUM, head: process.env.BRANCH, base: 'main', body }));
           ")
           curl -sS -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/pulls" -d "$PR_JSON" || true
