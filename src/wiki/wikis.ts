@@ -14,4 +14,5 @@ export const WIKIS: WikiEntry[] = [
   { code: "ma", name: "Memory Alpha", baseUrl: "https://memory-alpha.fandom.com", label: "Star Trek" },
   { code: "sgc", name: "SGCommand", baseUrl: "https://stargate.fandom.com", label: "Stargate" },
   { code: "b5", name: "The Babylon Project", baseUrl: "https://babylon5.fandom.com", label: "Babylon 5" },
+  { code: "bsg", name: "Battlestar Galactica Wiki", baseUrl: "https://galactica.fandom.com", label: "Battlestar: Galactica" },
 ];
