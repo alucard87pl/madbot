@@ -1,0 +1,41 @@
+name: Wiki request
+description: Request adding a new wiki to Madbot's supported list
+title: "[Wiki request] "
+labels: ["wiki-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is used by automation to open a PR that adds your wiki. Please fill in every field below.
+  - type: input
+    id: wiki_code
+    attributes:
+      label: Wiki code (short tag)
+      description: The tag users will pick in the `/wiki` command (e.g. `ma`, `sgc`, `b5`). Use lowercase letters and numbers only.
+      placeholder: e.g. mywiki
+    validations:
+      required: true
+  - type: input
+    id: display_name
+    attributes:
+      label: Display name
+      description: The full name of the wiki as it should appear in the bot (e.g. "Memory Alpha", "The Babylon Project").
+      placeholder: e.g. My Fandom Wiki
+    validations:
+      required: true
+  - type: input
+    id: base_url
+    attributes:
+      label: Base URL
+      description: The wiki's base URL **without** a trailing slash. For Fandom use `https://yoursite.fandom.com`.
+      placeholder: e.g. https://mywiki.fandom.com
+    validations:
+      required: true
+  - type: input
+    id: short_label
+    attributes:
+      label: Short label (for Discord)
+      description: A short label shown in the wiki dropdown (e.g. "Star Trek", "Stargate", "Babylon 5").
+      placeholder: e.g. My Fandom
+    validations:
+      required: true

@@ -16,9 +16,15 @@ function readStdin() {
   });
 }
 
-function extractSection(body, heading) {
-  const regex = new RegExp(`##\\s*${heading}[^\\n]*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i");
-  const m = body.match(regex);
+function extractSection(body, heading, altPattern) {
+  // Markdown template: ## Wiki code ... or ## Display name
+  let regex = new RegExp(`##\\s*${heading}[^\\n]*\\n([\\s\\S]*?)(?=\\n##\\s|\\n\\*\\*|$)`, "i");
+  let m = body.match(regex);
+  if (!m && altPattern) {
+    // Issue form: **Wiki code (short tag)** or **Display name**
+    regex = new RegExp(altPattern, "i");
+    m = body.match(regex);
+  }
   const raw = m ? m[1].trim() : "";
   return raw.replace(/\s+/g, " ").trim();
 }
@@ -27,10 +33,14 @@ function escapeForTsString(s) {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, " ");
 }
 
-const code = extractSection(body, "Wiki code").replace(/[^a-z0-9]/gi, "").toLowerCase();
-const name = extractSection(body, "Display name");
-const baseUrl = extractSection(body, "Base URL").replace(/\/+$/, "");
-const label = extractSection(body, "Short label");
+// Accept both markdown (## Heading) and issue form (**Label**) body format
+const code = (
+  extractSection(body, "Wiki code", "\\*\\*Wiki code[^*]*\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|$)") ||
+  extractSection(body, "Wiki code")
+).replace(/[^a-z0-9]/gi, "").toLowerCase();
+const name = extractSection(body, "Display name", "\\*\\*Display name\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|$)") || extractSection(body, "Display name");
+const baseUrl = (extractSection(body, "Base URL", "\\*\\*Base URL\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|$)") || extractSection(body, "Base URL")).replace(/\/+$/, "");
+const label = extractSection(body, "Short label", "\\*\\*Short label[^*]*\\*\\*\\s*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|$)") || extractSection(body, "Short label");
 
 if (!code || !name || !baseUrl || !label) {
   console.error("parse-wiki-request: missing field(s). Got code=%s name=%s baseUrl=%s label=%s", code, name, baseUrl, label);
