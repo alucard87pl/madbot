@@ -1,0 +1,70 @@
+# When someone opens an issue with the "Wiki request" template (label: wiki-request),
+# parse the issue body and open a PR that adds the new wiki to src/wiki/wikis.ts targeting dev.
+
+name: Wiki request PR
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issues' &&
+      (contains(github.event.issue.labels.*.name, 'wiki-request') ||
+       (github.event.action == 'labeled' && github.event.label.name == 'wiki-request'))
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Parse issue body
+        id: parse
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          node scripts/parse-wiki-request.mjs > wiki-line.txt
+          echo "Parsed wiki entry:"
+          cat wiki-line.txt
+
+      - name: Add wiki entry to wikis.ts
+        run: |
+          node -e "
+          const fs = require('fs');
+          const line = fs.readFileSync('wiki-line.txt', 'utf8').trim();
+          const path = 'src/wiki/wikis.ts';
+          let content = fs.readFileSync(path, 'utf8');
+          content = content.replace(/\];/, line + '\n];');
+          fs.writeFileSync(path, content);
+          "
+
+      - name: Create branch and push
+        id: push
+        run: |
+          BRANCH="wiki-request-${{ github.event.issue.number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add src/wiki/wikis.ts
+          if git diff --staged --quiet; then echo "No change (duplicate or parse produced no diff)"; echo "pushed=false" >> $GITHUB_OUTPUT; exit 0; fi
+          echo "pushed=true" >> $GITHUB_OUTPUT
+          git commit -m "Add wiki from issue #${{ github.event.issue.number }}"
+          git push origin "$BRANCH"
+
+      - name: Open PR
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="wiki-request-${{ github.event.issue.number }}"
+          EXISTING=$(gh pr list --base dev --head "$BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING" ]; then echo "PR already exists: #$EXISTING"; exit 0; fi
+          gh pr create --base dev --head "$BRANCH" \
+            --title "Add wiki: request from #${{ github.event.issue.number }}" \
+            --body "Automated PR from wiki request issue #${{ github.event.issue.number }}. Please review the new wiki entry and merge into \`dev\` if it looks good. Closes #${{ github.event.issue.number }}"

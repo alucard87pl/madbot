@@ -1,0 +1,44 @@
+{
+  "name": "madbot",
+  "version": "0.1.0",
+  "description": "Discord wiki lookup bot — slash commands, MediaWiki/Fandom and extensible to other wikis",
+  "type": "module",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/madbot.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "wiki": "tsx src/cli.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=true eslint src"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "wiki",
+    "fandom",
+    "mediawiki",
+    "memory-alpha"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^20.11.0",
+    "eslint": "^8.57.1",
+    "globals": "^17.3.0",
+    "jiti": "^2.6.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.54.0"
+  }
+}
